@@ -17,7 +17,7 @@ jobs:
       matrix:
         os: [ windows-2019 ]
         php: ['8.1', '8.2', '8.3']
-        grpc: ['1.62.0']
+        grpc: ['1.61.0']
     defaults:
       run:
         shell: pwsh
