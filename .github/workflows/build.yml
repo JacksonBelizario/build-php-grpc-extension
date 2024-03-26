@@ -15,33 +15,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-22.04, macos-12, macos-14 ]
+        os: [ windows-2019 ]
         php: ['8.0', '8.1', '8.2', '8.3']
-
-    steps:
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          extensions: none, grpc
-          php-version: ${{ matrix.php }}
-          coverage: none
-          tools: none
-      - name: Copy Extension
-        run: cp $(php-config --extension-dir)/grpc.so /tmp/grpc_${{ matrix.os }}_php-${{ matrix.php }}.so
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.os }}_php-${{ matrix.php }}
-          path: /tmp/grpc_${{ matrix.os }}_php-${{ matrix.php }}.so
-
-  build-windows:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ windows-2022 ]
-        php: ['8.0', '8.1', '8.2', '8.3']
-        grpc: ['1.61.0']
+        grpc: ['1.62.1']
     defaults:
       run:
         shell: pwsh
@@ -89,7 +65,7 @@ jobs:
           path: C:\grpc_${{ matrix.os }}_php-${{ matrix.php }}.dll
   release:
     runs-on: ubuntu-latest
-    needs: [build, build-windows]
+    needs: build
     steps:
       - uses: actions/checkout@v3
       - run: mkdir ext
@@ -100,7 +76,7 @@ jobs:
         run: |
           set -x
           assets=()
-          for asset in ./ext/*/*.{dll,so}; do
+          for asset in ./ext/*/*.dll; do
             assets+=("$asset")
           done
           if ! gh release view builds; then
